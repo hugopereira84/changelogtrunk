@@ -1,0 +1,25 @@
+name: Changelog generation
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  changelog:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # Get the previous tag.
+      - run: echo "PREVIOUS_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+
+      # Get the current commit hash.
+      - run: echo "CURRENT_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+      # Generate the changelog.
+      - run: ./generate-changelog.sh $PREVIOUS_TAG $CURRENT_COMMIT
+
+      # Commit the changelog to the main branch.
+      - run: git add CHANGELOG.md && git commit -m "Generated changelog for $CURRENT_COMMIT"
